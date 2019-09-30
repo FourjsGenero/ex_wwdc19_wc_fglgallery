@@ -26,4 +26,10 @@ To compare the code with the stock fglgallery code just do
     vimdiff fglgallery_demo.4gl fglgallery_demo.4gl.orig
     vimdiff webcomponents/fglgallery/js/fglgallery.js webcomponents/fglgallery/js/fglgallery.js.orig
 
-![screen shot](https://github.com/FourjsGenero/ex_wwdc19_wc_gallery/raw/master/fglgallery.jpg)
+![screen shot](https://github.com/FourjsGenero/ex_wwdc19_wc_fglgallery/raw/master/fglgallery.jpg)
+
+To run the simple sample with GDC do
+
+    make simple
+
+
