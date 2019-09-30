@@ -18,6 +18,7 @@ Note the implementation could be further enhanced by not exchanging the whole ga
 But the limiting factor for fglgallery is not the model itself, the pure amount of image data which is needed to be transferred is the limiting factor.
 
 To compare the code with the stock fglgallery code just do
+
     vimdiff fglgallery.4gl fglgallery.4gl.orig
     vimdiff simple_gallery.4gl simple_gallery.4gl.orig
     vimdiff fglgallery_demo.4gl fglgallery_demo.4gl.orig
