@@ -1,0 +1,435 @@
+#+ Genero Image Gallery library
+#+
+#+ This library implements a set of functions to create an image gallery
+#+ in a WEBCOMPONENT field.
+#+
+#+ The content of the WEBCOMPONENT field must be a JSON formatted string
+#+ defining the index of the current image and an array of indexes for
+#+ selected images, when multiple selection is activated.
+#+ The t_struct_value type is available to define your own structured
+#+ variable to build the JSON string easily.
+#+
+#+ @code
+#+ DEFINE wc_struct_value t_struct_value INTEGER
+#+ LET wc_struct_value.current = 12
+#+ LET wc_struct_value.selected[1] = 3
+#+ LET wc_struct_value.selected[1] = 8
+#+ LET wc_struct_value.selected[1] = 12
+#+ LET wc_value = util.JSON.stringify( wc_struct_value )
+#+ -- result: {"current":12,"selected":[3,8,12]}
+#+
+#+ The WEBCOMPONENT value is sent with an action event. The name of the
+#+ action can be defined in the PROPERTY attribute in the .per file:
+#+
+#+ @code
+#+ WEBCOMPONENT ...
+#+    PROPERTIES=(selection="image_selection"),
+#+
+#+ It is then possible to detect image selection in the program with an
+#+ ON ACTION handler:
+#+
+#+ @code
+#+ DEFINE wc_struct_value t_struct_value INTEGER
+#+ ...
+#+   ON ACTION image_selection
+#+        CALL util.JSON.parse( wc_value, wc_struct_value )
+#+
+
+IMPORT util
+
+PUBLIC TYPE t_struct_value RECORD
+                 current INTEGER,
+                 selected DYNAMIC ARRAY OF INTEGER
+             END RECORD
+
+PRIVATE TYPE t_image RECORD
+                 path STRING,
+                 title STRING,
+                 flushed BOOLEAN
+             END RECORD
+
+PRIVATE TYPE t_gallery RECORD
+               field STRING,
+               displayType SMALLINT,
+               imageSize SMALLINT,
+               imageAspectRatio DECIMAL(5,2),
+               images DYNAMIC ARRAY OF t_image
+             END RECORD
+
+PRIVATE DEFINE initCount SMALLINT
+PRIVATE DEFINE galleries DYNAMIC ARRAY OF t_gallery
+
+PUBLIC CONSTANT
+  FGLGALLERY_TYPE_MOSAIC        = 1,
+  FGLGALLERY_TYPE_LIST          = 2,
+  FGLGALLERY_TYPE_THUMBNAILS    = 3
+
+PUBLIC CONSTANT
+  FGLGALLERY_SIZE_XSMALL  =  1,
+  FGLGALLERY_SIZE_SMALL   =  2,
+  FGLGALLERY_SIZE_NORMAL  =  4,
+  FGLGALLERY_SIZE_LARGE   =  7,
+  FGLGALLERY_SIZE_XLARGE  = 11
+
+#+ Library initialization function.
+#+
+#+ This function has to be called before using other functions of this module.
+#+
+PUBLIC FUNCTION initialize()
+    WHENEVER ERROR RAISE
+    IF initCount == 0 THEN
+       -- prepare resources
+    END IF
+    LET initCount = initCount + 1
+END FUNCTION
+
+
+#+ Library finalization function.
+#+
+#+ This function has to be called when the library is not longer used.
+#+
+PUBLIC FUNCTION finalize()
+    IF initCount>0 THEN
+       LET initCount = initCount - 1
+       IF initCount == 0 THEN
+          CALL galleries.clear()
+       END IF
+    END IF
+END FUNCTION
+
+PRIVATE FUNCTION _check_initialized()
+    IF initCount==0 THEN
+       CALL _display_error("fglgallery library is not initialized")
+       OPEN FORM _dummy_ FROM NULL
+    END IF
+END FUNCTION
+
+PRIVATE FUNCTION _display_error(msg STRING)
+    DISPLAY "FGLGALLERY ERROR: ", msg
+END FUNCTION
+
+#+ Create a new gallery and return an ID
+#+
+#+ This function creates a new gallery object and returns its ID.
+#+ The gallery ID will be used in other functions to identify a
+#+ gallery object.
+#+ The function requires the name of the form field defining
+#+ the WEBCOMPONENT form item.
+#+
+#+ @code
+#+ DEFINE id SMALLINT
+#+ LET id = fglgallery.create("formonly.galley")
+#+
+#+ @param name The name of the WEBCOMPONENT form field.
+#+
+#+ @returnType SMALLINT
+#+ @return The gallery object ID
+#+
+PUBLIC FUNCTION create(name)
+    DEFINE name STRING
+    DEFINE id, i SMALLINT
+    CALL _check_initialized()
+    FOR i=1 TO galleries.getLength()
+        IF galleries[i].field IS NULL THEN
+           LET id = i
+        END IF
+    END FOR
+    IF id==0 THEN
+       LET id = galleries.getLength() + 1
+    END IF
+    LET galleries[id].field = name
+    LET galleries[id].imageAspectRatio = 1.0
+    RETURN id
+END FUNCTION
+
+#+ Destroy a gallery object
+#+
+#+ This function releases all resources allocated for the gallery.
+#+
+#+ @param id      The gallery id
+PUBLIC FUNCTION destroy(id)
+    DEFINE id SMALLINT
+    CALL _check_id(id)
+    INITIALIZE galleries[id].* TO NULL
+END FUNCTION
+
+-- Raises an error that can be trapped in callers because of WHENEVER ERROR RAISE
+PRIVATE FUNCTION _check_id(id)
+    DEFINE id SMALLINT
+    CALL _check_initialized()
+    IF id>=1 AND id<=galleries.getLength() THEN
+       IF galleries[id].field IS NOT NULL THEN
+          RETURN
+       END IF
+    END IF
+    CALL _display_error(SFMT("Invalid fglgallery id %1",id))
+    OPEN FORM _dummy_ FROM NULL
+END FUNCTION
+PRIVATE FUNCTION _check_image_index(id, index)
+    DEFINE id, index SMALLINT
+    IF index<1 OR index>galleries[id].images.getLength() THEN
+       CALL _display_error(SFMT("Invalid fglgallery image index %1",index))
+       OPEN FORM _dummy_ FROM NULL
+    END IF
+END FUNCTION
+
+#+ Add a new image to the web component gallery.
+#+
+#+ The function requires the gallery id, the path to the image file, which
+#+ can be an URL or a local relative path, and a title/description of the
+#+ picture. Leave title NULL if you don't want to add a description.
+#+
+#+ The function only registers the image resource for the gallery.
+#+ In order to display the added images, you must call the flush() or the
+#+ display() function.
+#+
+#+ @code
+#+ CALL fglgallery.addImage(id, ui.Interface.filenameToURI("landscape.jpg"), "A nice landscape.")
+#+
+#+ @param id      The gallery id
+#+ @param path    The path of the image file (on the server).
+#+ @param title   The title or short description of the image.
+#+
+PUBLIC FUNCTION addImage(id, path, title)
+    DEFINE id SMALLINT,
+           path, title STRING
+    DEFINE x INTEGER
+
+    CALL _check_id(id)
+    CALL galleries[id].images.appendElement()
+    LET x = galleries[id].images.getLength()
+    LET galleries[id].images[x].path = path
+    LET galleries[id].images[x].title = title
+    LET galleries[id].images[x].flushed = false
+
+END FUNCTION
+
+
+#+ Returns the current number of images in a gallery.
+#+
+#+ @param id      The gallery id
+#+
+#+ @returnType INTEGER
+#+ @return The number of images in the gallery.
+#+
+PUBLIC FUNCTION getImageCount(id)
+    DEFINE id SMALLINT
+
+    CALL _check_id(id)
+    RETURN galleries[id].images.getLength()
+
+END FUNCTION
+
+PRIVATE FUNCTION _has_unflushed_images(id)
+    DEFINE id SMALLINT
+    DEFINE i,x INTEGER
+    LET x = galleries[id].images.getLength()
+    FOR i=1 TO x
+        IF NOT galleries[id].images[i].flushed THEN
+           RETURN TRUE
+        END IF
+    END FOR
+    RETURN FALSE
+END FUNCTION
+
+#+ Flushes images that have been added with the addImage() function.
+#+
+#+ This function takes the image gallery id as parameter, and sends new
+#+ added images to the front-end for display.
+#+ Note that the display() function will do an automatic flush():
+#+ The flush() function is typically used after display(), to add new
+#+ images to the gallery, when the gallery is already visible.
+#+
+#+ @param id    The gallery id
+#+
+PUBLIC FUNCTION flush(id)
+    DEFINE id SMALLINT
+    DEFINE tmp STRING,
+           x INTEGER,
+           i INTEGER
+
+    CALL _check_id(id)
+
+    IF NOT _has_unflushed_images(id) THEN RETURN END IF
+
+    LET tmp = util.JSON.stringify(galleries[id].images)
+    CALL ui.Interface.frontCall( "webcomponent", "call",
+            [galleries[id].field, "flush", tmp],
+            []
+         )
+    LET x = galleries[id].images.getLength()
+    FOR i=1 TO x
+        LET galleries[id].images[i].flushed = TRUE
+    END FOR
+END FUNCTION
+
+#+ Define the aspect ratio for image items.
+#+
+#+ Call this function to define how images are sized relatively to others.
+#+
+#+ @code
+#+ CALL fglgallery.setImageAspectRatio(id, 1.77) -- 16:9
+#+ CALL fglgallery.display(id, ...)
+#+
+#+ @param id     The gallery id
+#+ @param ratio  The image aspect ratio.
+#+
+PUBLIC FUNCTION setImageAspectRatio(id, ratio)
+    DEFINE id SMALLINT, ratio DECIMAL(5,2)
+    CALL _check_id(id)
+    LET galleries[id].imageAspectRatio = ratio
+END FUNCTION
+
+#+ Display the gallery in your web component.
+#+
+#+ Call this function to show the image gallery in your form.
+#+ This function requires two arguments: the gallery id and the gallery type.
+#+ If the added images have not been flushed with the flush() function, the
+#+ display() function will do an automatic flush().
+#+
+#+ @code
+#+ CALL fglgallery.display(id, FGLGALLERY_TYPE_MOSAIC, FGLGALLERY_SIZE_NORMAL)
+#+
+#+ @param id     The gallery id
+#+ @param type   The display type of the gallery, can be: FGLGALLERY_TYPE_MOSAIC, FGLGALLERY_TYPE_LIST, FGLGALLERY_THUMBNAILS
+#+ @param size   The size of the images, can be: FGLGALLERY_SIZE_XSMALL, FGLGALLERY_SIZE_SMALL, FGLGALLERY_SIZE_NORMAL, FGLGALLERY_SIZE_LARGE, FGLGALLERY_SIZE_XLARGE
+#+
+PUBLIC FUNCTION display(id, type, size)
+    DEFINE id SMALLINT, type SMALLINT, size SMALLINT
+
+    CALL _check_id(id)
+    CALL flush(id) -- implicit flush
+    LET galleries[id].displayType = type
+    LET galleries[id].imageSize = size
+    CALL ui.Interface.frontCall( "webcomponent", "call",
+            [galleries[id].field, "display", type, size, galleries[id].imageAspectRatio],
+            []
+         )
+
+END FUNCTION
+
+#+ Enable or disable multiple image selection
+#+
+#+ Call this function to activate or deactivate multiple image selection.
+#+ Note that this feature may not work with all sort of display types.
+#+
+#+ @param id  The gallery id
+#+ @param on  TRUE or FALSE
+#+
+PUBLIC FUNCTION setMultipleSelection(id, on)
+    DEFINE id SMALLINT,
+           on BOOLEAN
+    DEFINE param STRING
+
+    LET param = IIF(on, "enable", "disable")
+    CALL ui.Interface.frontCall( "webcomponent", "call",
+            [galleries[id].field, "setMultipleSelection", param],
+            []
+         )
+END FUNCTION
+
+#+ Return the path of the image identified by the index given as parameter
+#+
+#+ Call this function to get the image path correspondong to the index in the gallery.
+#+ This function requires two arguments : the gallery id and the image index.
+#+
+#+ @code
+#+ CALL fglgallery.getPath(id, index)
+#+
+#+ @param id     The gallery id
+#+ @param index  The index of your image
+#+
+PUBLIC FUNCTION getPath(id, index)
+    DEFINE id SMALLINT, index INTEGER
+
+    CALL _check_id(id)
+    CALL _check_image_index(id, index)
+
+    RETURN galleries[id].images[index].path
+
+END FUNCTION
+
+
+#+ Return the title of the image identified by the index given as parameter
+#+
+#+ Call this function to get your image title (according to the index given) of your gallery in your web component.
+#+ This function requires two arguments : the gallery id and the image index.
+#+
+#+ @code
+#+ CALL fglgallery.getTitle(id, index)
+#+
+#+ @param id     The gallery id
+#+ @param index  The index of your image
+#+
+PUBLIC FUNCTION getTitle(id, index)
+    DEFINE id SMALLINT, index INTEGER
+
+    CALL _check_id(id)
+    CALL _check_image_index(id, index)
+
+    RETURN galleries[id].images[index].title
+
+END FUNCTION
+
+
+#+ Delete images in the gallery
+#+
+#+ Call this function to delete images (according to the list of image indexes) in your gallery.
+#+ This function requires two arguments : the gallery id and a dynamic array of image indexes.
+#+
+#+ @code
+#+ CALL fglgallery.deleteImages(id, indexes)
+#+
+#+ @param id       The gallery id
+#+ @param indexes  The dynamic array of image indexes
+#+
+PUBLIC FUNCTION deleteImages(id, indexes)
+    DEFINE id SMALLINT,
+           indexes DYNAMIC ARRAY OF INTEGER
+    DEFINE i INTEGER, tmp STRING
+    DEFINE todel DYNAMIC ARRAY OF BOOLEAN
+
+    CALL _check_id(id)
+    FOR i=1 TO indexes.getLength()
+        CALL _check_image_index(id, indexes[i])
+        LET todel[indexes[i]] = TRUE
+    END FOR
+
+    LET tmp = util.JSON.stringify(indexes)
+    CALL ui.Interface.frontCall( "webcomponent", "call",
+            [galleries[id].field, "deleteImages", tmp],
+            []
+         )
+
+    FOR i=1 TO todel.getLength()
+        IF todel[i] THEN
+           CALL galleries[id].images.deleteElement(i)
+           CALL todel.deleteElement(i)
+        END IF
+    END FOR
+
+END FUNCTION
+
+
+#+ Remove all images from the list.
+#+
+#+ Call this function to clean the gallery.
+#+ This function takes the gallery id as parameter.
+#+
+#+ @code
+#+ CALL fglgallery.clean(id)
+#+
+#+ @param id     The gallery id
+#+
+PUBLIC FUNCTION clean(id)
+    DEFINE id SMALLINT
+
+    CALL _check_id(id)
+
+    CALL galleries[id].images.clear()
+    CALL ui.Interface.frontCall( "webcomponent", "call",
+            [galleries[id].field, "clean"],
+            []
+         )
+
+END FUNCTION

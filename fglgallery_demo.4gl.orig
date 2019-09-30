@@ -1,0 +1,252 @@
+IMPORT util
+
+IMPORT FGL fglgallery
+
+DEFINE arr DYNAMIC ARRAY OF INTEGER
+
+DEFINE rec RECORD
+               gallery_type INTEGER,
+               gallery_size INTEGER,
+               aspect_ratio DECIMAL(5,2),
+               multiple_selection BOOLEAN,
+               current INTEGER,
+               path STRING,
+               selected STRING,
+               gallery_wc STRING
+           END RECORD
+DEFINE struct_value fglgallery.t_struct_value
+
+MAIN
+    DEFINE id, i SMALLINT
+
+{
+    DISPLAY "FGLIMAGEPATH              = ", fgl_getenv("FGLIMAGEPATH")
+    DISPLAY "FGL_PRIVATE_DIR           = ", fgl_getenv("FGL_PRIVATE_DIR")
+    DISPLAY "FGL_PRIVATE_URL_PREFIX    = ", fgl_getenv("FGL_PRIVATE_URL_PREFIX")
+
+    DISPLAY "FGL_PUBLIC_DIR            = ", fgl_getenv("FGL_PUBLIC_DIR")
+    DISPLAY "FGL_PUBLIC_IMAGEPATH      = ", fgl_getenv("FGL_PUBLIC_IMAGEPATH")
+    DISPLAY "FGL_PUBLIC_URL_PREFIX     = ", fgl_getenv("FGL_PUBLIC_URL_PREFIX")
+}
+
+    OPEN FORM f1 FROM "fglgallery_demo"
+    DISPLAY FORM f1
+
+    OPTIONS INPUT WRAP, FIELD ORDER FORM
+
+    DISPLAY "Initializing fglgallery ..."
+
+    CALL fglgallery.initialize()
+    LET id = fglgallery.create("formonly.gallery_wc")
+    DISPLAY SFMT("formonly.gallery_wc received id %1.", id)
+
+    -- Image files on the server
+    CALL fglgallery.addImage(id, image_path("image01.jpg"), NULL)
+    CALL fglgallery.addImage(id, image_path("image02.jpg"), NULL)
+    CALL fglgallery.addImage(id, image_path("image03.jpg"), "Lightning.")
+    CALL fglgallery.addImage(id, image_path("image04.jpg"), NULL)
+    CALL fglgallery.addImage(id, image_path("image05.jpg"), "The road will be long. Really long.")
+    CALL fglgallery.addImage(id, image_path("image06.jpg"), "Picture taken during the harvest time. This is a very long text to show how it renders with the different gallery types.")
+    CALL fglgallery.addImage(id, image_path("image07.png"), NULL)
+    CALL fglgallery.addImage(id, image_path("image08.jpg"), "A nice windmill in a field.")
+    CALL fglgallery.addImage(id, image_path("image09.png"), "Big wheat field.")
+    CALL fglgallery.addImage(id, image_path("image10.jpg"), NULL)
+    CALL fglgallery.addImage(id, image_path("image11.jpg"), NULL)
+
+    -- URLs
+    --CALL fglgallery.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/mountain-ridge.jpg", "Mountain ridge")
+    --CALL fglgallery.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/mountain-horse.jpg", "Horse in field")
+    --CALL fglgallery.addImage(id, "http://freebigpictures.com/wp-content/uploads/forest-in-spring-646x433.jpg", "Forest in spring")
+
+    DISPLAY "All images added. Displaying the gallery..."
+
+    LET rec.gallery_type = FGLGALLERY_TYPE_MOSAIC
+    LET rec.gallery_size = FGLGALLERY_SIZE_NORMAL
+    LET rec.aspect_ratio = 1.0
+    LET struct_value.current = 1
+    CALL struct_value.selected.clear()
+    LET rec.current = struct_value.current
+    LET rec.path = fglgallery.getPath(id, struct_value.current)
+    LET rec.selected = util.JSON.stringify(struct_value.selected)
+    LET rec.gallery_wc = util.JSON.stringify(struct_value)
+    CALL fglgallery.display(id, rec.gallery_type, rec.gallery_size)
+
+    DISPLAY "Starting dialog ..."
+
+    INPUT BY NAME rec.* ATTRIBUTES (UNBUFFERED, WITHOUT DEFAULTS)
+
+    BEFORE INPUT
+        DISPLAY "Input initialized"
+        CALL DIALOG.setActionActive("delete",struct_value.selected.getLength()>0)
+        CALL DIALOG.setActionActive("flush", FALSE)
+
+    ON ACTION wc_enable ATTRIBUTES(TEXT="Enable WC")
+        CALL DIALOG.setFieldActive("gallery_wc", TRUE)
+    ON ACTION wc_disable ATTRIBUTES(TEXT="Disable WC")
+        CALL DIALOG.setFieldActive("gallery_wc", FALSE)
+
+    ON ACTION set_current ATTRIBUTES(TEXT="Set current")
+        LET struct_value.current = rec.current
+        CALL struct_value.selected.clear()
+        LET rec.gallery_wc = util.JSON.stringify(struct_value)
+        LET rec.path = fglgallery.getPath(id, struct_value.current)
+        LET rec.selected = NULL
+
+    ON ACTION select_all ATTRIBUTES(TEXT="Select all")
+        LET rec.multiple_selection = TRUE
+        CALL fglgallery.setMultipleSelection(id, rec.multiple_selection)
+        CALL struct_value.selected.clear()
+        FOR i=1 TO fglgallery.getImageCount(id)
+            LET struct_value.selected[i] = i
+        END FOR
+        LET rec.selected = util.JSON.stringify( struct_value.selected )
+        LET rec.gallery_wc = util.JSON.stringify(struct_value)
+        CALL DIALOG.setActionActive("delete",struct_value.selected.getLength()>0)
+
+    ON ACTION select_3_5 ATTRIBUTES(TEXT="Select 3 and 5")
+        LET rec.multiple_selection = TRUE
+        CALL fglgallery.setMultipleSelection(id, rec.multiple_selection)
+        CALL struct_value.selected.clear()
+        LET struct_value.selected[1] = 3
+        LET struct_value.selected[2] = 5
+        LET rec.selected = util.JSON.stringify( struct_value.selected )
+        LET rec.gallery_wc = util.JSON.stringify(struct_value)
+        CALL DIALOG.setActionActive("delete",struct_value.selected.getLength()>0)
+
+    ON ACTION deselect_all ATTRIBUTES(TEXT="Deselect all")
+        LET rec.multiple_selection = TRUE
+        CALL fglgallery.setMultipleSelection(id, rec.multiple_selection)
+        CALL struct_value.selected.clear()
+        LET rec.selected = util.JSON.stringify( struct_value.selected )
+        LET rec.gallery_wc = util.JSON.stringify(struct_value)
+        CALL DIALOG.setActionActive("delete",FALSE)
+
+    ON ACTION image_selection
+        CALL util.JSON.parse( rec.gallery_wc, struct_value )
+        LET rec.current = struct_value.current
+        LET rec.path = fglgallery.getPath(id, struct_value.current)
+        LET rec.selected = util.JSON.stringify(struct_value.selected)
+        CALL DIALOG.setActionActive("delete",struct_value.selected.getLength()>0)
+
+    ON CHANGE multiple_selection
+        CALL fglgallery.setMultipleSelection(id, rec.multiple_selection)
+        CALL struct_value.selected.clear()
+        LET rec.selected = NULL
+        LET rec.gallery_wc = util.JSON.stringify(struct_value)
+
+    ON CHANGE gallery_type
+        CALL fglgallery.display(id, rec.gallery_type, rec.gallery_size)
+
+    ON CHANGE gallery_size
+        CALL fglgallery.display(id, rec.gallery_type, rec.gallery_size)
+
+    ON CHANGE aspect_ratio
+        CALL fglgallery.setImageAspectRatio(id, rec.aspect_ratio)
+        CALL fglgallery.display(id, rec.gallery_type, rec.gallery_size)
+
+    ON ACTION delete ATTRIBUTES(TEXT="Delete selected")
+        IF struct_value.selected.getLength()>0 THEN
+            CALL fglgallery.deleteImages(id, struct_value.selected)
+            LET rec.current = NULL
+            LET rec.path = NULL
+            LET rec.selected = NULL
+            LET rec.gallery_wc = NULL
+        END IF
+
+    ON ACTION delete_3_5 ATTRIBUTES(TEXT="Delete 3 and 5")
+        IF fglgallery.getImageCount(id) >= 5 THEN
+            CALL arr.clear()
+            LET arr[1] = 3
+            LET arr[2] = 5
+            CALL fglgallery.deleteImages(id, arr)
+            LET rec.current = 1
+            LET rec.path = NULL
+            LET rec.selected = NULL
+            LET struct_value.current = 1
+            CALL struct_value.selected.clear()
+            LET rec.gallery_wc = util.JSON.stringify(struct_value)
+        END IF
+
+    ON ACTION delete_current ATTRIBUTES(TEXT="Delete current")
+        IF rec.current>=1 AND rec.current<=fglgallery.getImageCount(id) THEN
+           CALL arr.clear()
+           LET arr[1] = rec.current
+           CALL fglgallery.deleteImages(id, arr)
+           IF rec.current > fglgallery.getImageCount(id) THEN
+              LET rec.current = fglgallery.getImageCount(id)
+           END IF
+           LET rec.path = NULL
+           LET rec.selected = NULL
+           LET struct_value.current = rec.current
+           CALL struct_value.selected.clear()
+           LET rec.gallery_wc = util.JSON.stringify(struct_value)
+        END IF
+
+    ON ACTION clean ATTRIBUTES(TEXT="Clean")
+        LET rec.gallery_wc = NULL
+        LET rec.current = NULL
+        LET rec.path = NULL
+        LET rec.selected = NULL
+        CALL fglgallery.clean(id)
+
+    ON ACTION gallery_redisplay ATTRIBUTES(TEXT="Re-display")
+        CALL fglgallery.display(id, rec.gallery_type, rec.gallery_size)
+
+    ON ACTION add_3 ATTRIBUTES(TEXT="Add 3 images")
+        LET i = fglgallery.getImageCount(id)
+        CALL fglgallery.addImage(id, image_path("image02.jpg"), SFMT("New image A %1", i:=i+1 ));
+        CALL fglgallery.addImage(id, image_path("image05.jpg"), SFMT("New image B %1", i:=i+1 ));
+        CALL fglgallery.addImage(id, image_path("image07.png"), SFMT("New image C %1", i:=i+1 ));
+        CALL DIALOG.setActionActive("flush", TRUE)
+
+    ON ACTION flush ATTRIBUTES(TEXT="Flush")
+        CALL fglgallery.flush(id)
+        CALL DIALOG.setActionActive("flush", FALSE)
+
+    ON ACTION close
+        DISPLAY "ON ACTION close ..."
+        EXIT INPUT
+
+    END INPUT
+
+    DISPLAY "Dialog finished."
+
+    CALL fglgallery.destroy(id)
+    CALL fglgallery.finalize()
+
+    DISPLAY "Goodbye."
+
+END MAIN
+
+FUNCTION image_path(path)
+    DEFINE path STRING
+    RETURN ui.Interface.filenameToURI(path)
+END FUNCTION
+
+FUNCTION display_type_init(cb)
+    DEFINE cb ui.ComboBox
+    CALL cb.addItem(FGLGALLERY_TYPE_MOSAIC,        "Mosaic")
+    CALL cb.addItem(FGLGALLERY_TYPE_LIST,          "List")
+    CALL cb.addItem(FGLGALLERY_TYPE_THUMBNAILS,    "Thumbnails")
+END FUNCTION
+
+FUNCTION display_size_init(cb)
+    DEFINE cb ui.ComboBox
+    CALL cb.addItem(FGLGALLERY_SIZE_XSMALL, "X-Small")
+    CALL cb.addItem(FGLGALLERY_SIZE_SMALL,  "Small")
+    CALL cb.addItem(FGLGALLERY_SIZE_NORMAL, "Normal")
+    CALL cb.addItem(FGLGALLERY_SIZE_LARGE,  "Large")
+    CALL cb.addItem(FGLGALLERY_SIZE_XLARGE, "X-Large")
+END FUNCTION
+
+FUNCTION aspect_ratio_init(cb)
+    DEFINE cb ui.ComboBox
+    -- Use strings for value to match DECIMAL(5,2) formatting
+    CALL cb.addItem("1.00",  "1:1")
+    CALL cb.addItem("1.77",  "16:9")
+    CALL cb.addItem("1.50",  "3:2")
+    CALL cb.addItem("1.33",  "4:3")
+    CALL cb.addItem("1.25",  "5:4")
+    CALL cb.addItem("0.56",  "9:16")
+    CALL cb.addItem("0.80",  "4:5")
+END FUNCTION

@@ -1,0 +1,35 @@
+<!--
+ FOURJS_START_COPYRIGHT(P,2017)
+ Property of Four Js*
+ (c) Copyright Four Js 2017, 2019. All Rights Reserved.
+ * Trademark of Four Js Development Tools Europe Ltd
+   in the United States and elsewhere
+ FOURJS_END_COPYRIGHT
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html" charset="utf-8" />
+<meta name='viewport' content='initial-scale=1.0, maximum-scale=1.0' />
+<link type="text/css" rel="stylesheet" href="css/fglgallery.css" />
+<!--link type="text/css" rel="stylesheet" href="css/fglgallery-custom.css" /-->
+</head>
+
+<body>
+
+<div>
+  <div id="main" class="unstyled-main main-unfocused main-enabled" >
+    <div id="imageCurrent" class="curr-group" >
+       <img id="imageCurrentImage" class="curr-picture" />
+       <div id="imageCurrentTitle" class="curr-title" ></div>
+    </div>
+    <ul id="imageSet" class="unstyled-imgset" onscroll="myLazyLoad.update()" ></ul>
+  </div>
+</div>
+
+<script type="text/javascript" src="js/lazyload.js"></script>
+<script type="text/javascript" src="js/fglgallery.js"></script>
+
+</body>
+</html>

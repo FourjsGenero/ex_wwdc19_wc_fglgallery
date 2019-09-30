@@ -1,0 +1,47 @@
+ACTION DEFAULTS
+  ACTION cancel (DEFAULTVIEW=NO)
+  ACTION getvalue (DEFAULTVIEW=NO)
+  ACTION image_selection (DEFAULTVIEW=NO)
+END
+
+LAYOUT (TEXT="Image Gallery")
+GRID
+{
+ Presentation  Size         Aspect
+[f1           |f2          |f3       ]
+["Current Image":f4 :f41             ]
+[f6              :                   ]
+["Multiple Selection":               ]
+[f5                                  ]
+[wc1                                 ]
+[                                    ]
+[                                    ]
+[                                    ]
+[                                    ]
+[                                    ]
+[                                    ]
+[                                    ]
+}
+END
+END
+ATTRIBUTES
+COMBOBOX f1 = FORMONLY.gallery_type, NOT NULL,
+         INITIALIZER=display_type_init;
+COMBOBOX f2 = FORMONLY.gallery_size, NOT NULL,
+         INITIALIZER=display_size_init;
+COMBOBOX f3 = FORMONLY.aspect_ratio, NOT NULL,
+         INITIALIZER=aspect_ratio_init;
+EDIT f4 = FORMONLY.current, COLOR=RED;
+EDIT f41= FORMONLY.path, SCROLL, COLOR=BLUE, NOENTRY;
+EDIT f5 = FORMONLY.selected, COLOR=BLUE, SCROLL, NOENTRY;
+CHECKBOX f6 = FORMONLY.multiple_selection, NOT NULL,
+         TEXT="Enable multiple selection",
+         VALUECHECKED=1, VALUEUNCHECKED=0; 
+WEBCOMPONENT wc1 = FORMONLY.gallery_wc,
+         COMPONENTTYPE = "fglgallery",
+         PROPERTIES=(
+              selection="image_selection"
+         ),
+         SIZEPOLICY = FIXED,
+         STRETCH = BOTH;
+END

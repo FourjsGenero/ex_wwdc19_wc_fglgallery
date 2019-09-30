@@ -1,0 +1,37 @@
+# FOURJS_START_COPYRIGHT(P,2017)
+# Property of Four Js*
+# (c) Copyright Four Js 2017, 2019. All Rights Reserved.
+# * Trademark of Four Js Development Tools Europe Ltd
+#   in the United States and elsewhere
+# FOURJS_END_COPYRIGHT
+
+LAYOUT (TEXT="Image Gallery")
+GRID
+{
+[f1        |f2        |f3     ]
+ Current:[f4   ]
+[wc1                          ]
+[                             ]
+[                             ]
+[                             ]
+[                             ]
+[                             ]
+[                             ]
+[                             ]
+}
+END
+END
+ATTRIBUTES
+COMBOBOX f1 = FORMONLY.gallery_type, NOT NULL,
+         INITIALIZER=display_type_init;
+COMBOBOX f2 = FORMONLY.gallery_size, NOT NULL,
+         INITIALIZER=display_size_init;
+COMBOBOX f3 = FORMONLY.aspect_ratio, NOT NULL,
+         INITIALIZER=aspect_ratio_init;
+EDIT f4 = FORMONLY.current;
+WEBCOMPONENT wc1 = FORMONLY.gallery_wc,
+         COMPONENTTYPE = "fglgallery",
+         PROPERTIES=(selection="image_selection"),
+         SIZEPOLICY = FIXED,
+         STRETCH = BOTH;
+END

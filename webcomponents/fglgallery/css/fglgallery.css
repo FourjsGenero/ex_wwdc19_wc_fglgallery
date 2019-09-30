@@ -1,0 +1,190 @@
+/*
+ * FOURJS_START_COPYRIGHT(P,2017)
+ * Property of Four Js*
+ * (c) Copyright Four Js 2017, 2019. All Rights Reserved.
+ * * Trademark of Four Js Development Tools Europe Ltd
+ *   in the United States and elsewhere
+ * FOURJS_END_COPYRIGHT
+ */
+
+.text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-left: 0.3em;
+    margin-right: 0.3em;
+}
+
+.text-wrap {
+    margin-left: 0.3em;
+    margin-right: 0.3em;
+}
+
+.image-selected {
+    background-color: rgba(70, 121, 189, 0.5);
+}
+
+.image-current {
+    outline: 1px solid #000099;
+}
+
+.main-focused {
+    border: 1px solid #AAAA99;
+}
+
+.main-unfocused {
+    border: 1px solid transparent;
+}
+
+.main-enabled {
+    opacity: 1.0;
+}
+
+.main-disabled {
+    opacity: 0.5;
+    pointer-events:none;
+}
+
+.unstyled-main {
+    margin: 0 auto;
+}
+
+.unstyled-imgset {
+    padding-left: 0;
+    list-style: outside none none;
+}
+
+.unstyled-lg {
+    margin: 0 auto;
+}
+
+
+.mosaic-main {
+    margin: 0 auto;
+}
+
+.mosaic-imgset {
+    list-style: outside none none;
+}
+
+.mosaic-image-li {
+    display: inline-block;
+    text-align: center;
+    margin : 0.2em;
+    border: 1px solid #eee;
+}
+
+.mosaic-image-li:hover {
+    border: 1px solid #777;
+}
+
+.mosaic-image-div {
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+.mosaic-image-text {
+    font-family: "Arial", serif;
+    text-align: center;
+}
+
+
+.list-main {
+    margin: 0 auto;
+}
+
+.list-imgset {
+    padding-left: 0;
+    list-style: outside none none;
+}
+
+.list-image-li {
+    padding-left: 0.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    border: 1px solid transparent;
+}
+
+.list-image-li:hover {
+    border: 1px solid #777;
+}
+
+.list-image-div {
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.list-image-text {
+    font-family: "Arial", serif;
+    display: table-cell;
+    vertical-align: middle;
+    padding-left: 0.7em;
+}
+
+
+.thumbnails-main {
+    margin: 0 auto;
+    text-align: center;
+}
+
+.thumbnails-imgset {
+    margin: 0 auto;
+    width: 85%;
+    text-align: center;
+
+    list-style: none;
+    display: block;
+    white-space: nowrap;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+}
+
+.thumbnails-current-image-text {
+    font-family: "Arial", serif;
+    text-align: center;
+}
+
+.thumbnails-image-li {
+    display: inline-block;
+    border: 1px solid transparent;
+}
+
+.thumbnails-image-li:hover {
+    border: 1px solid #777;
+}
+
+.thumbnails-image-div {
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    margin: 0.3em;
+}
+
+.curr-group {
+    text-align: center;
+}
+
+.curr-picture {
+    vertical-align: middle;
+    padding-top: 0.6em;
+}
+
+.curr-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 1.5em;
+    text-align: center;
+    padding-top: 0.8em;
+    padding-bottom: 0.1em;
+}
+
