@@ -12,7 +12,7 @@ Why ?
 * Ensures best performance in all network configurations
 * Enables the browser to draw the whole DOM en bloc (with frontcalls after each frontcall the browser recomputes and draws the DOM in addition to the value changes)
 
-It needs adaptation of the current fglgalleryX API (No 100% compatible replacement ), because the original implementation already uses the webcomponents value for the selection model.
+It needs adaptation of the current fglgallery API (No 100% compatible replacement ), because the original implementation already uses the webcomponents value for the selection model.
 
 Result:
 * All features are working with roughly the same number of code lines.
