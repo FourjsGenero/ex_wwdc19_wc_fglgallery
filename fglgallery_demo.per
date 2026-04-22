@@ -9,7 +9,7 @@ GRID
 {
  Presentation  Size         Aspect
 [f1           |f2          |f3       ]
-["Current Image":f4 :f41             ]
+[curr    :f4  |f41                   ]
 [f6              :                   ]
 ["Multiple Selection":               ]
 [f5                                  ]
@@ -31,6 +31,7 @@ COMBOBOX f2 = FORMONLY.gallery_size, NOT NULL,
          INITIALIZER=display_size_init;
 COMBOBOX f3 = FORMONLY.aspect_ratio, NOT NULL,
          INITIALIZER=aspect_ratio_init;
+LABEL curr: TEXT="Current Image";
 EDIT f4 = FORMONLY.current, COLOR=RED;
 EDIT f41= FORMONLY.path, SCROLL, COLOR=BLUE, NOENTRY;
 EDIT f5 = FORMONLY.selected, COLOR=BLUE, SCROLL, NOENTRY;
