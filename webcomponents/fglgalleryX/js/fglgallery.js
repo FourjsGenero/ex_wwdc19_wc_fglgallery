@@ -347,7 +347,7 @@ function addToDisplay(displayType, imageDefsToAdd)
             if ( getPictureElement(id) === null) {
                 ei = document.createElement("li");
                 ei.setAttribute("class", "thumbnails-image-li");
-                ei.setAttribute("id", getPictureId(i));
+                ei.setAttribute("id", getPictureId(id));
                 ei.setAttribute("data-src", imageDefsToAdd[i].src);
                 ei.setAttribute("onclick", "imageClicked(this.id)");
                 imageSet.appendChild(ei);
