@@ -34,7 +34,7 @@ Important note:
 This sample is an attempt to show case Web component sync techniques without using web component frontcalls. However as it's rather untested it's not recommended to use it in production (yet).
 The fglgallery shipped with the Genero distribution is still the mean of choice when it comes to official support. 
 
-(Note also that its impossible to override a webcomponent placed in $FGLDIR/webcomponents by a webcomponent place in APPDIR/webcomponents.. Therefore "fglgalleryX" has been chosen to be able to run the original web component and this webcomponent side by side.)
+(Note also that its impossible to override a webcomponent placed in $FGLDIR/webcomponents by a webcomponent placed in APPDIR/webcomponents.. Therefore "fglgalleryX" has been chosen to be able to run the original web component and this webcomponent side by side.)
 
 ![screen shot](https://github.com/FourjsGenero/ex_wwdc19_wc_fglgallery/raw/master/fglgallery.jpg)
 
