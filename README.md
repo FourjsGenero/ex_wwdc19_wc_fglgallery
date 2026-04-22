@@ -1,6 +1,9 @@
 # ex_wwdc19_wc_fglgallery
 WWDC2019 fglgallery webcomponent sample ( modifying the  stock fglgallery  implementation to avoid additional network round trips caused by frontcalls and unwanted side effects )
 
+Download the full session from 
+https://4js.com/files/documents/wwdc19/03_Breakout/C3-WWDC_19_WEB_COMPONENTS_AND_FRONTCALLS_IN_DEPTH.pdf .
+
 This example focuses on removing webcomponent frontcalls internally and replaces it
 by a complete serialization/deserialization the gallery model via JSON.
 
