@@ -1,5 +1,5 @@
 IMPORT util
-IMPORT FGL fglgallery
+IMPORT FGL fglgalleryX
 
 DEFINE rec RECORD
                gallery_type INTEGER,
@@ -17,61 +17,61 @@ MAIN
 
     OPTIONS INPUT WRAP, FIELD ORDER FORM
 
-    CALL fglgallery.initialize()
-    LET id = fglgallery.create("formonly.gallery_wc")
+    CALL fglgalleryX.initialize()
+    LET id = fglgalleryX.create("formonly.gallery_wc")
 
     -- Image files on the server, to be handled with filenameToURI()/FGLIMAGEPATH
     -- From images-public dir:
-    CALL fglgallery.addImage(id, image_path("image01.jpg"), "Lake in mountains")
-    CALL fglgallery.addImage(id, image_path("image02.jpg"), NULL)
-    CALL fglgallery.addImage(id, image_path("image03.jpg"), "Lightning")
+    CALL fglgalleryX.addImage(id, image_path("image01.jpg"), "Lake in mountains")
+    CALL fglgalleryX.addImage(id, image_path("image02.jpg"), NULL)
+    CALL fglgalleryX.addImage(id, image_path("image03.jpg"), "Lightning")
     -- From images-private dir:
-    CALL fglgallery.addImage(id, image_path("image10.jpg"), "Outdoor cat")
-    CALL fglgallery.addImage(id, image_path("image11.jpg"), NULL)
+    CALL fglgalleryX.addImage(id, image_path("image10.jpg"), "Outdoor cat")
+    CALL fglgalleryX.addImage(id, image_path("image11.jpg"), NULL)
 
     -- URLs
-    CALL fglgallery.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/mountain-ridge.jpg", "Mountain ridge")
-    CALL fglgallery.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/mountain-horse.jpg", "Horse in field")
-    CALL fglgallery.addImage(id, "http://freebigpictures.com/wp-content/uploads/forest-in-spring-646x433.jpg", "Forest in spring")
-    CALL fglgallery.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/mountain-waterfall.jpg", "Montain waterfall" )
-    CALL fglgallery.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/summer-river-646x432.jpg", "River in summer")
-    CALL fglgallery.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/reservoir-lake.jpg", "Reservoir lake")
+    CALL fglgalleryX.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/mountain-ridge.jpg", "Mountain ridge")
+    CALL fglgalleryX.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/mountain-horse.jpg", "Horse in field")
+    CALL fglgalleryX.addImage(id, "http://freebigpictures.com/wp-content/uploads/forest-in-spring-646x433.jpg", "Forest in spring")
+    CALL fglgalleryX.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/mountain-waterfall.jpg", "Montain waterfall" )
+    CALL fglgalleryX.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/summer-river-646x432.jpg", "River in summer")
+    CALL fglgalleryX.addImage(id, "http://freebigpictures.com/wp-content/uploads/2009/09/reservoir-lake.jpg", "Reservoir lake")
 
     LET rec.gallery_type = FGLGALLERY_TYPE_MOSAIC
     LET rec.gallery_size = FGLGALLERY_SIZE_NORMAL
     LET rec.aspect_ratio = 1.0
-    CALL fglgallery.setCurrent(id,1)
+    CALL fglgalleryX.setCurrent(id,1)
     LET rec.current = 1
-    LET rec.gallery_wc = fglgallery.display(id, rec.gallery_type, rec.gallery_size)
+    LET rec.gallery_wc = fglgalleryX.display(id, rec.gallery_type, rec.gallery_size)
     DISPLAY rec.gallery_wc TO gallery_wc
 
     INPUT BY NAME rec.* ATTRIBUTES (UNBUFFERED, WITHOUT DEFAULTS)
 
     ON CHANGE gallery_type
-        LET rec.gallery_wc = fglgallery.display(id, rec.gallery_type, rec.gallery_size)
+        LET rec.gallery_wc = fglgalleryX.display(id, rec.gallery_type, rec.gallery_size)
 
     ON CHANGE gallery_size
-        LET rec.gallery_wc = fglgallery.display(id, rec.gallery_type, rec.gallery_size)
+        LET rec.gallery_wc = fglgalleryX.display(id, rec.gallery_type, rec.gallery_size)
 
     ON CHANGE aspect_ratio
-        CALL fglgallery.setImageAspectRatio(id, rec.aspect_ratio)
-        LET rec.gallery_wc = fglgallery.display(id, rec.gallery_type, rec.gallery_size)
+        CALL fglgalleryX.setImageAspectRatio(id, rec.aspect_ratio)
+        LET rec.gallery_wc = fglgalleryX.display(id, rec.gallery_type, rec.gallery_size)
 
     ON ACTION set_current ATTRIBUTES(TEXT="Set current")
-        CALL fglgallery.setCurrent(id, rec.current)
-        LET rec.gallery_wc = fglgallery.flush(id)
+        CALL fglgalleryX.setCurrent(id, rec.current)
+        LET rec.gallery_wc = fglgalleryX.flush(id)
 
     ON ACTION image_selection ATTRIBUTES(DEFAULTVIEW=NO)
-        CALL fglgallery.deserialize( id, rec.gallery_wc )
-        LET rec.current = fglgallery.getCurrent(id)
+        CALL fglgalleryX.deserialize( id, rec.gallery_wc )
+        LET rec.current = fglgalleryX.getCurrent(id)
 
     ON ACTION close
         EXIT INPUT
 
     END INPUT
 
-    CALL fglgallery.destroy(id)
-    CALL fglgallery.finalize()
+    CALL fglgalleryX.destroy(id)
+    CALL fglgalleryX.finalize()
 
 END MAIN
 

@@ -12,7 +12,7 @@ Why ?
 * Ensures best performance in all network configurations
 * Enables the browser to draw the whole DOM en bloc (with frontcalls after each frontcall the browser recomputes and draws the DOM in addition to the value changes)
 
-It needs adaptation of the current fglgallery API (No 100% compatible replacement ), because the original implementation already uses the webcomponents value for the selection model.
+It needs adaptation of the current fglgalleryX API (No 100% compatible replacement ), because the original implementation already uses the webcomponents value for the selection model.
 
 Result:
 * All features are working with roughly the same number of code lines.
@@ -24,10 +24,17 @@ But the limiting factor for fglgallery is not the model itself, the pure amount 
 
 To compare the code with the stock fglgallery code just do
 
-    vimdiff fglgallery.4gl fglgallery.4gl.orig
+    vimdiff fglgalleryX.4gl fglgallery.4gl.orig
     vimdiff simple_gallery.4gl simple_gallery.4gl.orig
     vimdiff fglgallery_demo.4gl fglgallery_demo.4gl.orig
-    vimdiff webcomponents/fglgallery/js/fglgallery.js webcomponents/fglgallery/js/fglgallery.js.orig
+    vimdiff webcomponents/fglgalleryX/js/fglgallery.js webcomponents/fglgalleryX/js/fglgallery.js.orig
+
+Important note:
+
+This sample is an attempt to show case Web component sync techniques without using web component frontcalls. However as it's rather untested it's not recommended to use it in production (yet).
+The fglgallery shipped with the Genero distribution is still the mean of choice when it comes to official support. 
+
+(Note also that its impossible to override a webcomponent placed in $FGLDIR/webcomponents by a webcomponent place in APPDIR/webcomponents.. Therefore "fglgalleryX" has been chosen to be able to run the original web component and this webcomponent side by side.)
 
 ![screen shot](https://github.com/FourjsGenero/ex_wwdc19_wc_fglgallery/raw/master/fglgallery.jpg)
 

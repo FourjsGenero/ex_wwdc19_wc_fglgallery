@@ -10,7 +10,7 @@ FORMS=$(patsubst %.per,%.42f,$(wildcard *.per))
 
 all:: $(MODS) $(FORMS)
 
-fglgallery_demo.42m: fglgallery.42m
+fglgallery_demo.42m: fglgalleryX.42m
 
 run: all
 	FGLIMAGEPATH="images-public:images-private:." fglrun fglgallery_demo
